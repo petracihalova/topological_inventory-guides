@@ -68,22 +68,26 @@ gem install bundler
 echo "-------------------------------------------------------"
 echo "Copying database.yml from topological_inventory-api/config/database.dev.yml..."
 
-cd ${TOPOLOGICAL_API_DIR}
-dev_ymls=("config/database.yml"
-          "../topological_inventory-core/config/database.yml"
-          "../topological_inventory-persister/config/database.yml"
-          "../topological_inventory-ingress_api/config/database.yml"
-          "../topological_inventory-sync/config/database.yml")
+if [ -d ${TOPOLOGICAL_API_DIR} ]; then
+    cd ${TOPOLOGICAL_API_DIR}
+    dev_ymls=("config/database.yml"
+              "../topological_inventory-core/config/database.yml"
+              "../topological_inventory-persister/config/database.yml"
+              "../topological_inventory-ingress_api/config/database.yml"
+              "../topological_inventory-sync/config/database.yml")
 
-echo "Copying ${TOPOLOGICAL_API_DIR}/config/database.dev.yml"
-for dest_path in ${dev_ymls[@]}; do
-    if [[ -f ${dest_path} ]]; then
-        echo "[SKIPPED] File already exists: ${dest_path}"
-    else
-        cp config/database.dev.yml ${dest_path}
-        echo "[OK] Copied to: ${dest_path}"
-    fi
-done
+    echo "Copying ${TOPOLOGICAL_API_DIR}/config/database.dev.yml"
+    for dest_path in ${dev_ymls[@]}; do
+        if [[ -f ${dest_path} ]]; then
+            echo "[SKIPPED] File already exists: ${dest_path}"
+        else
+            cp config/database.dev.yml ${dest_path}
+            echo "[OK] Copied to: ${dest_path}"
+        fi
+    done
+else
+    echo "Info: Directory ${TOPOLOGICAL_API_DIR} does not exists. Skipping this step."
+fi
 
 echo "-------------------------------------------------------"
 echo "Copying ${SOURCES_API_DIR}/config/database.dev.yml"
@@ -118,19 +122,25 @@ do
     fi
 done
 
-#
 # 8) Configure UI
-#
 echo "-------------------------------------------------------"
-cd "$root_dir/insights-proxy"
-npm install
+if [ -d ${INSIGHTS_PROXY_DIR} ]; then
+    cd ${INSIGHTS_PROXY_DIR}
+    npm install
 
-echo "Patching /etc/hosts to connect localhost with CI/QA servers, please provide sudo credentials"
-sudo bash scripts/patch-etc-hosts.sh
-bash scripts/update.sh
+    echo "Patching /etc/hosts to connect localhost with CI/QA servers, please provide sudo credentials"
+    sudo bash scripts/patch-etc-hosts.sh
+    bash scripts/update.sh
+else
+    echo "Info: Directory ${INSIGHTS_PROXY_DIR} does not exists. Skipping this step."
+fi
 
-cd "$root_dir/sources-ui"
-npm install
+if [ -d ${SOURCES_UI_DIR} ]; then
+    cd ${SOURCES_UI_DIR}
+    npm install
+else
+    echo "Info: Directory ${SOURCES_UI_DIR} does not exists. Skipping this step."
+fi
 
 echo "-------------------------------------------------------"
 echo "Successfully installed!"

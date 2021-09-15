@@ -5,9 +5,12 @@ source init-common.sh
 
 cwd=$(pwd)
 
-cd ${TOPOLOGICAL_API_DIR}
-
-bundle exec rake db:create
+if [ -d ${TOPOLOGICAL_API_DIR} ]; then
+    cd ${TOPOLOGICAL_API_DIR}
+    bundle exec rake db:create
+else
+    echo "Info: Directory ${TOPOLOGICAL_API_DIR} does not exists. Skipping this step."
+fi
 
 cd ${SOURCES_API_DIR}
 bundle exec rake db:create
